@@ -5,6 +5,7 @@ from colorama import init
 import sys
 import signal
 if __name__ == '__main__':
+    print('loisproBot by @x1dan')
     load_dotenv()
     Sentry.init()
     init(convert=True)

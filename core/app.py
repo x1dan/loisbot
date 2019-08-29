@@ -18,25 +18,30 @@ class App():
         if client.get_me():
             code = Lois.auth()
             print(Fore.GREEN + "Код для авторизации - " + code)
-            CountSleep.countdown(t=5)
+            CountSleep.countdown(t=os.getenv("WAIT_AUTH"))
             client.send_message('@loisprobot', code)
-            CountSleep.countdown(t=5)
+            CountSleep.countdown(t=os.getenv("WAIT_AUTH"))
             token = Lois.get_token(code)
             print(Fore.GREEN + "Токен авторизации - " + token)
             while True:
                 try:
-                    CountSleep.countdown(t=60)
+                    CountSleep.countdown(t=os.getenv("WAIT_TASKS"))
                     balance = Lois.get_me(token)
                     print(Fore.GREEN + 'Ваш баланс - ' + balance)
-                    CountSleep.countdown(t=60)
+                    CountSleep.countdown(t=os.getenv("WAIT_TASKS"))
                     tasks = Lois.get_tasks(token)
                     for task in tasks:
                         if task['type'] == 'tg_members':
                             print(Fore.GREEN + 'Подписываемся на - @' + task['item']['attr']['url'])
-                            client(JoinChannelRequest(task['item']['attr']['url']))
-                            CountSleep.countdown(t=5)
-                            Lois.check_task(token,id=task['id'])
-                            CountSleep.countdown(t=5)
+                            try:
+                                client(JoinChannelRequest(task['item']['attr']['url']))
+                                CountSleep.countdown(t=os.getenv("WAIT_SUBSCRIBE"))
+                                client.send_message(os.getenv("USER_NOTIFICATE"), 'Успешная подписка на группу @' + task['item']['attr']['url'])
+                                Lois.check_task(token,id=task['id'])
+                                CountSleep.countdown(t=os.getenv("WAIT_SUBSCRIBE"))
+                            except:
+                                print(Fore.RED + 'Не удалось подписаться')
+                                continue
                 except KeyboardInterrupt:
                     print ("Bye")
                     sys.exit()
